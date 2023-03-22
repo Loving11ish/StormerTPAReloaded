@@ -1,0 +1,17 @@
+name: StormerTPAReloaded
+version: '${project.version}'
+main: me.loving11ish.stormertpareloaded.StormerTPAReloaded
+api-version: 1.13
+authors: [ Loving11ish, stormer3428 ]
+commands:
+  tpa:
+    description: "Sends a request to teleport you to a player"
+  tpahere:
+    description: "Sends a request to teleport a player to you"
+    aliases: [tpah]
+  tpaccept:
+    description: "Accepts the teleport request"
+    aliases: [tpyes]
+  tpdeny:
+    description: "Refuses the teleport request"
+    aliases: [tpno]

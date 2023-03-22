@@ -1,0 +1,8 @@
+teleportationTicksDelay: 60
+requiresImmobile: false
+teleportRequestDuration : 300
+unsafe-blocks-list:
+  - LAVA
+  - MAGMA_BLOCK
+  - WATER
+  - CACTUS
