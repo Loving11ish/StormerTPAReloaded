@@ -10,7 +10,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class TeleportRequest {
 
@@ -156,10 +158,21 @@ public class TeleportRequest {
 
     private static void teleport(Player target, Location loc) {
         PaperLib.teleportAsync(target, loc);
-        target.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 60, 0, true));
-        target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 60, 255, true));
-        target.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 60, 255, true));
-        target.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 60, 0, true));
+        if (StormerTPAReloaded.i.getConfig().getBoolean("teleport-effects.enabled")){
+            int duration = StormerTPAReloaded.i.getConfig().getInt("teleport-effects.global-duration");
+            int multiplier = StormerTPAReloaded.i.getConfig().getInt("teleport-effects.global-multiplier");
+            List<String> effectNameList = StormerTPAReloaded.i.getConfig().getStringList("teleport-effects.effects");
+            List<PotionEffectType> effectList = new ArrayList<>();
+            for (String list : effectNameList){
+                PotionEffectType potionEffect = PotionEffectType.getByName(list);
+                if (potionEffect != null){
+                    effectList.add(potionEffect);
+                }
+            }
+            for (PotionEffectType potionEffectType : effectList) {
+                target.addPotionEffect(new PotionEffect(potionEffectType, duration, multiplier, true));
+            }
+        }
     }
 
     public void cancel() {

@@ -1,8 +1,18 @@
 teleportationTicksDelay: 60
 requiresImmobile: false
 teleportRequestDuration : 300
+teleport-effects:
+  enabled: true
+  effects:
+    - BLINDNESS
+    - SLOW
+    - DAMAGE_RESISTANCE
+    - INVISIBILITY
+  global-duration: 60
+  global-multiplier: 255
 unsafe-blocks-list:
   - LAVA
   - MAGMA_BLOCK
   - WATER
   - CACTUS
+  - AIR
