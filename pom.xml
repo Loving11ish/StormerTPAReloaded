@@ -6,13 +6,13 @@
 
     <groupId>me.loving11ish</groupId>
     <artifactId>StormerTPAReloaded</artifactId>
-    <version>1.0.0-BETA-01</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>StormerTPAReloaded</name>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -31,13 +31,17 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version> <!-- Make sure to always use the latest version (https://maven.apache.org/plugins/maven-shade-plugin/) -->
+                <version>3.4.1</version> <!-- Make sure to always use the latest version (https://maven.apache.org/plugins/maven-shade-plugin/) -->
                 <configuration>
                     <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation>
                     <relocations>
                         <relocation>
                             <pattern>io.papermc.lib</pattern>
                             <shadedPattern>me.loving11ish.stormertpareloaded.paperlib</shadedPattern> <!-- Replace this -->
+                        </relocation>
+                        <relocation>
+                            <pattern>com.tcoded.folialib</pattern>
+                            <shadedPattern>me.loving11ish.stormertpareloaded.folialib</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>
@@ -72,6 +76,15 @@
             <id>papermc</id>
             <url>https://papermc.io/repo/repository/maven-public/</url>
         </repository>
+        <repository>
+            <id>devmart-other</id>
+            <url>https://nexuslite.gcnt.net/repos/other/</url>
+        </repository>
+        <!-- PlugMan -->
+        <repository>
+            <id>PlugMan</id>
+            <url>https://raw.githubusercontent.com/TheBlackEntity/PlugMan/repository/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -86,6 +99,18 @@
             <artifactId>paperlib</artifactId>
             <version>1.0.7</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.tcoded</groupId>
+            <artifactId>FoliaLib</artifactId>
+            <version>0.2.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.rylinaux</groupId>
+            <artifactId>PlugMan</artifactId>
+            <version>2.2.9</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

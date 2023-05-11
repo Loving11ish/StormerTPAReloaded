@@ -1,12 +1,12 @@
 package me.loving11ish.stormertpareloaded.lang;
 
-import org.bukkit.ChatColor;
+import me.loving11ish.stormertpareloaded.ColorUtils;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 public enum Lang {
 
-    PREFIX_COMMAND("§3[§6STPA§3]§2"),
-    PREFIX_ERROR("§3[§4Error§3]§c"),
+    PREFIX_COMMAND("&3[&6STPAR&3]&2"),
+    PREFIX_ERROR("&3[&4Error&3]&c"),
 
     ERROR_PLAYERONLY("Sorry, but only a player may run this command"),
     ERROR_MISSING_PLAYER_ARG("You need to specify the player you wish to send the request to"),
@@ -15,7 +15,6 @@ public enum Lang {
     ERROR_NO_REQUEST_PENDING("You currently do not have any request pending"),
 
     TPA_CANCELLED("The teleport request has been cancelled"),
-    TPA_CANCELLED_MOVE("You moved! Teleportation cancelled..."),
     TPA_CANCELLED_UNSAFE("Teleport destination is unsafe, cancelling..."),
     TPA_REQUEST_SENT("Request sent to <PLAYER>, it will expire in <SECONDS> seconds"),
     TPA_REQUEST_RECEIVED_TPA("<PLAYER> has sent you a request to teleport to you, type /tpaccept to accept or /tpdeny to refuse, it will expire in <SECONDS> seconds"),
@@ -44,7 +43,7 @@ public enum Lang {
 
     @Override
     public String toString() {
-        return ChatColor.translateAlternateColorCodes('&', LANG.getString(this.path, this.def));
+        return ColorUtils.translateColorCodes(LANG.getString(this.path, this.def));
     }
 
     public String getPath() {

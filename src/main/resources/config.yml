@@ -1,6 +1,6 @@
-teleportationTicksDelay: 60
+teleportationDelay: 5 #In seconds
 requiresImmobile: false
-teleportRequestDuration : 300
+teleportRequestDuration : 30 #In seconds
 teleport-effects:
   enabled: true
   effects:

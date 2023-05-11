@@ -1,5 +1,9 @@
 package me.loving11ish.stormertpareloaded;
 
+import com.rylinaux.plugman.api.PlugManAPI;
+import com.tcoded.folialib.FoliaLib;
+import com.tcoded.folialib.wrapper.WrappedTask;
+import io.papermc.lib.PaperLib;
 import me.loving11ish.stormertpareloaded.lang.Lang;
 import me.loving11ish.stormertpareloaded.lang.Message;
 import org.bukkit.Bukkit;
@@ -15,12 +19,15 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public final class StormerTPAReloaded extends JavaPlugin implements Listener {
 
     public static StormerTPAReloaded i;
+    private FoliaLib foliaLib = new FoliaLib(this);
+    Logger logger = this.getLogger();
 
-    public static int teleportationTicksDelay = 0;
+    public static int teleportationDelay = 0;
     public static int teleportRequestDuration = 0;
     public static boolean requiresImmobile = false;
 
@@ -30,6 +37,45 @@ public final class StormerTPAReloaded extends JavaPlugin implements Listener {
     public void onEnable() {
         //Plugin startup logic
         i = this;
+
+        //Suggest PaperMC if not using
+        if (foliaLib.isUnsupported()||foliaLib.isSpigot()){
+            PaperLib.suggestPaper(this);
+        }
+
+        //Check if PlugManX is enabled
+        if (isPlugManXEnabled()) {
+            if (!PlugManAPI.iDoNotWantToBeUnOrReloaded("StormerTPAReloaded")) {
+                logger.severe(ColorUtils.translateColorCodes("&c-------------------------------------------"));
+                logger.severe(ColorUtils.translateColorCodes("&c-------------------------------------------"));
+                logger.severe(ColorUtils.translateColorCodes("&4WARNING WARNING WARNING WARNING!"));
+                logger.severe(ColorUtils.translateColorCodes("&c-------------------------------------------"));
+                logger.severe(ColorUtils.translateColorCodes("&6StormerTPAReloaded: &4You appear to be using an unsupported version of &d&lPlugManX"));
+                logger.severe(ColorUtils.translateColorCodes("&6StormerTPAReloaded: &4Please &4&lDO NOT USE PLUGMANX TO LOAD/UNLOAD/RELOAD THIS PLUGIN!"));
+                logger.severe(ColorUtils.translateColorCodes("&6StormerTPAReloaded: &4Please &4&lFULLY RESTART YOUR SERVER!"));
+                logger.severe(ColorUtils.translateColorCodes("&c-------------------------------------------"));
+                logger.severe(ColorUtils.translateColorCodes("&6StormerTPAReloaded: &4This plugin &4&lHAS NOT &4been validated to use this version of PlugManX!"));
+                logger.severe(ColorUtils.translateColorCodes("&6StormerTPAReloaded: &4&lNo official support will be given to you if you use this!"));
+                logger.severe(ColorUtils.translateColorCodes("&6StormerTPAReloaded: &4&lUnless Loving11ish has explicitly agreed to help!"));
+                logger.severe(ColorUtils.translateColorCodes("&6StormerTPAReloaded: &4Please add StormerTPAReloaded to the ignored-plugins list in PlugManX's config.yml"));
+                logger.severe(ColorUtils.translateColorCodes("&c-------------------------------------------"));
+                logger.severe(ColorUtils.translateColorCodes("&6StormerTPAReloaded: &6Continuing plugin startup"));
+                logger.severe(ColorUtils.translateColorCodes("&c-------------------------------------------"));
+                logger.severe(ColorUtils.translateColorCodes("&c-------------------------------------------"));
+            }else {
+                logger.info(ColorUtils.translateColorCodes("&a-------------------------------------------"));
+                logger.info(ColorUtils.translateColorCodes("&6StormerTPAReloaded: &aSuccessfully hooked into PlugManX"));
+                logger.info(ColorUtils.translateColorCodes("&6StormerTPAReloaded: &aSuccessfully added StormerTPAReloaded to ignoredPlugins list."));
+                logger.info(ColorUtils.translateColorCodes("&6StormerTPAReloaded: &6Continuing plugin startup"));
+                logger.info(ColorUtils.translateColorCodes("&a-------------------------------------------"));
+            }
+        }else {
+            logger.info(ColorUtils.translateColorCodes("-------------------------------------------"));
+            logger.info(ColorUtils.translateColorCodes("&6StormerTPAReloaded: &cPlugManX not found!"));
+            logger.info(ColorUtils.translateColorCodes("&6StormerTPAReloaded: &cDisabling PlugManX hook loader"));
+            logger.info(ColorUtils.translateColorCodes("&6StormerTPAReloaded: &6Continuing plugin startup"));
+            logger.info(ColorUtils.translateColorCodes("-------------------------------------------"));
+        }
         super.onEnable();
 
         getCommand("tpa").setExecutor(this);
@@ -61,25 +107,24 @@ public final class StormerTPAReloaded extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         //Plugin shutdown logic
-
-        //Stop background tasks
         try {
-            if (Bukkit.getScheduler().isCurrentlyRunning(TeleportRequest.taskID1)||Bukkit.getScheduler().isQueued(TeleportRequest.taskID1)){
-                Bukkit.getScheduler().cancelTask(TeleportRequest.taskID1);
+            WrappedTask wrappedTask1 = TeleportRequest.getWrappedTaskOne();
+            WrappedTask wrappedTask2 = TeleportRequest.getWrappedTaskTwo();
+            wrappedTask1.cancel();
+            wrappedTask2.cancel();
+            if (foliaLib.isUnsupported()){
+                Bukkit.getScheduler().cancelTasks(this);
             }
-            if (Bukkit.getScheduler().isCurrentlyRunning(TeleportRequest.taskID2)||Bukkit.getScheduler().isQueued(TeleportRequest.taskID2)){
-                Bukkit.getScheduler().cancelTask(TeleportRequest.taskID2);
-            }
-            Message.systemNormal("All background tasks disabled successfully!");
-        }catch (Exception e){
-            Message.systemNormal("All background tasks disabled successfully!");
+            logger.info(ColorUtils.translateColorCodes("&6StormerTPAReloaded: &aAll background task disabled successfully."));
+        } catch (Exception e){
+            logger.info(ColorUtils.translateColorCodes("&6StormerTPAReloaded: &aAll background task disabled successfully."));
         }
     }
 
     public void loadConfig() {
-        getConfig().options().copyDefaults(true);
-        saveConfig();
-        teleportationTicksDelay = getConfig().getInt("teleportationTicksDelay");
+        getConfig().options().copyDefaults();
+        saveDefaultConfig();
+        teleportationDelay = getConfig().getInt("teleportationDelay");
         teleportRequestDuration = getConfig().getInt("teleportRequestDuration");
         requiresImmobile = getConfig().getBoolean("requiresImmobile");
         ArrayList<String> configBadBlocksList = new ArrayList<>(getConfig().getStringList("unsafe-blocks-list"));
@@ -130,13 +175,29 @@ public final class StormerTPAReloaded extends JavaPlugin implements Listener {
     public void onMove(PlayerMoveEvent e) {
         if(!requiresImmobile) return;
         if(TeleportRequest.all.containsKey(e.getPlayer()) && TeleportRequest.all.get(e.getPlayer()).teleporting) {
-            Message.normal(Lang.TPA_CANCELLED_MOVE.toString());
             TeleportRequest.all.get(e.getPlayer()).cancel();
+            TeleportRequest.all.remove(e.getPlayer());
         }
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
-        if(TeleportRequest.all.containsKey(e.getPlayer())) TeleportRequest.all.get(e.getPlayer()).cancel();
+        if(TeleportRequest.all.containsKey(e.getPlayer())){
+            TeleportRequest.all.get(e.getPlayer()).cancel();
+            TeleportRequest.all.remove(e.getPlayer());
+        }
+    }
+
+    public boolean isPlugManXEnabled() {
+        try {
+            Class.forName("com.rylinaux.plugman.PlugMan");
+            logger.info(ColorUtils.translateColorCodes("&6StormerWarpsReloaded: &aFound PlugManX main class at:"));
+            logger.info(ColorUtils.translateColorCodes("&6StormerWarpsReloaded: &dcom.rylinaux.plugman.PlugMan"));
+            return true;
+        } catch (ClassNotFoundException e) {
+            logger.warning(ColorUtils.translateColorCodes("&6StormerWarpsReloaded: &aCould not find PlugManX main class at:"));
+            logger.warning(ColorUtils.translateColorCodes("&6StormerWarpsReloaded: &dcom.rylinaux.plugman.PlugMan"));
+            return false;
+        }
     }
 }

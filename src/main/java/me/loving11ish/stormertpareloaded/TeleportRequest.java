@@ -1,9 +1,10 @@
 package me.loving11ish.stormertpareloaded;
 
+import com.tcoded.folialib.FoliaLib;
+import com.tcoded.folialib.wrapper.WrappedTask;
 import io.papermc.lib.PaperLib;
 import me.loving11ish.stormertpareloaded.lang.Lang;
 import me.loving11ish.stormertpareloaded.lang.Message;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -13,11 +14,14 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class TeleportRequest {
 
-    public static Integer taskID1;
-    public static Integer taskID2;
+    public static WrappedTask wrappedTaskOne;
+    public static WrappedTask wrappedTaskTwo;
+
+    private FoliaLib foliaLib = new FoliaLib(StormerTPAReloaded.i);
 
     public static enum TeleportRequestType{
         TPA,
@@ -47,23 +51,24 @@ public class TeleportRequest {
         this.receiver = receiver;
         this.type = type;
         all.put(receiver, this);
-        Message.normal(sender, Lang.TPA_REQUEST_SENT.toString().replace("<PLAYER>", receiver.getName()).replace("<SECONDS>", ""+(StormerTPAReloaded.teleportRequestDuration / 20)));
-        Message.normal(receiver, (type == TeleportRequestType.TPA ? Lang.TPA_REQUEST_RECEIVED_TPA : Lang.TPA_REQUEST_RECEIVED_TPAHERE).toString().replace("<PLAYER>", sender.getName()).replace("<SECONDS>", ""+(StormerTPAReloaded.teleportRequestDuration / 20)));
-
-
-        taskID1 = Bukkit.getScheduler().scheduleSyncDelayedTask(StormerTPAReloaded.i, new Runnable() {
+        Message.normal(sender, Lang.TPA_REQUEST_SENT.toString().replace("<PLAYER>", receiver.getName()).replace("<SECONDS>", ""+(StormerTPAReloaded.teleportRequestDuration)));
+        Message.normal(receiver, (type == TeleportRequestType.TPA ? Lang.TPA_REQUEST_RECEIVED_TPA : Lang.TPA_REQUEST_RECEIVED_TPAHERE).toString().replace("<PLAYER>", sender.getName()).replace("<SECONDS>", ""+(StormerTPAReloaded.teleportRequestDuration)));
+        wrappedTaskOne = foliaLib.getImpl().runLaterAsync(new Runnable() {
             @Override
             public void run() {
                 if(TeleportRequest.this.processed || TeleportRequest.this.teleporting) {
-                    cancel();
+                    TeleportRequest.this.processed = true;
+                    getWrappedTaskOne().cancel();
                     return;
                 }
+
                 TeleportRequest.this.processed = true;
                 all.remove(TeleportRequest.this.receiver);
                 Message.normal(TeleportRequest.this.receiver, Lang.TPA_REQUEST_EXPIRED_RECEIVED.toString().replace("<PLAYER>", sender.getName()));
                 Message.normal(TeleportRequest.this.sender, Lang.TPA_REQUEST_EXPIRED_SENT.toString().replace("<PLAYER>", receiver.getName()));
+                getWrappedTaskOne().cancel();
             }
-        }, StormerTPAReloaded.teleportRequestDuration);
+        }, StormerTPAReloaded.teleportRequestDuration, TimeUnit.SECONDS);
     }
 
     public static void accept(Player p) {
@@ -87,22 +92,26 @@ public class TeleportRequest {
         Message.normal(destination, Lang.TPA_REQUEST_ACCEPTED_TO.toString().replace("<PLAYER>", target.getName()));
         Message.normal(target, Lang.TPA_REQUEST_ACCEPTED_FROM.toString().replace("<PLAYER>", destination.getName()));
 
-        if(StormerTPAReloaded.teleportationTicksDelay <= 0) {
+        if(StormerTPAReloaded.teleportationDelay <= 0) {
             findSafeTeleportSpot();
             return;
         }
 
         this.teleporting = true;
-        taskID2 = Bukkit.getScheduler().scheduleSyncDelayedTask(StormerTPAReloaded.i, new Runnable() {
+
+        wrappedTaskTwo = foliaLib.getImpl().runAtLocationLater(target.getLocation() ,new Runnable() {
             @Override
             public void run() {
                 if(TeleportRequest.this.processed) {
-                    cancel();
+                    getWrappedTaskOne().cancel();
+                    getWrappedTaskTwo().cancel();
                     return;
                 }
                 findSafeTeleportSpot();
+                getWrappedTaskOne().cancel();
+                getWrappedTaskTwo().cancel();
             }
-        }, StormerTPAReloaded.teleportationTicksDelay);
+        }, StormerTPAReloaded.teleportationDelay, TimeUnit.SECONDS);
     }
 
     public static void deny(Player p) {
@@ -179,5 +188,13 @@ public class TeleportRequest {
         this.processed = true;
         Message.normal(this.sender, Lang.TPA_CANCELLED.toString());
         Message.normal(this.receiver, Lang.TPA_CANCELLED.toString());
+    }
+
+    public static WrappedTask getWrappedTaskOne() {
+        return wrappedTaskOne;
+    }
+
+    public static WrappedTask getWrappedTaskTwo() {
+        return wrappedTaskTwo;
     }
 }
