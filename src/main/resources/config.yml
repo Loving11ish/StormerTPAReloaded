@@ -10,6 +10,8 @@ teleport-effects:
     - INVISIBILITY
   global-duration: 60
   global-multiplier: 255
+#The below system does not function on Folia due to API block checking issues.
+enable-safe-block-checks: true
 unsafe-blocks-list:
   - LAVA
   - MAGMA_BLOCK

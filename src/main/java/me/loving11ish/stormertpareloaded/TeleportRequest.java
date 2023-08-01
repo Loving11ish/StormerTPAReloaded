@@ -1,7 +1,7 @@
 package me.loving11ish.stormertpareloaded;
 
 import com.tcoded.folialib.FoliaLib;
-import com.tcoded.folialib.wrapper.WrappedTask;
+import com.tcoded.folialib.wrapper.task.WrappedTask;
 import io.papermc.lib.PaperLib;
 import me.loving11ish.stormertpareloaded.lang.Lang;
 import me.loving11ish.stormertpareloaded.lang.Message;
@@ -21,7 +21,7 @@ public class TeleportRequest {
     public static WrappedTask wrappedTaskOne;
     public static WrappedTask wrappedTaskTwo;
 
-    private FoliaLib foliaLib = new FoliaLib(StormerTPAReloaded.i);
+    private FoliaLib foliaLib = StormerTPAReloaded.i.getFoliaLib();
 
     public static enum TeleportRequestType{
         TPA,
@@ -93,7 +93,16 @@ public class TeleportRequest {
         Message.normal(target, Lang.TPA_REQUEST_ACCEPTED_FROM.toString().replace("<PLAYER>", destination.getName()));
 
         if(StormerTPAReloaded.teleportationDelay <= 0) {
-            findSafeTeleportSpot();
+            if (!foliaLib.isFolia()){
+                if (StormerTPAReloaded.useSafeLocationCheck){
+                    findSafeTeleportSpot();
+                }else {
+                    runTeleportSequence();
+                }
+            }else {
+                runTeleportSequence();
+            }
+
             return;
         }
 
@@ -107,7 +116,15 @@ public class TeleportRequest {
                     getWrappedTaskTwo().cancel();
                     return;
                 }
-                findSafeTeleportSpot();
+                if (!foliaLib.isFolia()){
+                    if (StormerTPAReloaded.useSafeLocationCheck){
+                        findSafeTeleportSpot();
+                    }else {
+                        runTeleportSequence();
+                    }
+                }else {
+                    runTeleportSequence();
+                }
                 getWrappedTaskOne().cancel();
                 getWrappedTaskTwo().cancel();
             }
@@ -126,6 +143,20 @@ public class TeleportRequest {
     public void deny() {
         Message.normal(this.sender, Lang.TPA_REQUEST_REFUSED_SENT.toString().replace("<PLAYER>", receiver.getName()));
         Message.normal(this.receiver, Lang.TPA_REQUEST_REFUSED_RECEIVED.toString().replace("<PLAYER>", sender.getName()));
+        this.processed = true;
+        all.remove(this.receiver);
+    }
+
+    private void runTeleportSequence() {
+        Player target = this.sender;
+        Player destination = this.receiver;
+        if (this.type == TeleportRequestType.TPAHERE) {
+            target = this.receiver;
+            destination = this.sender;
+        }
+
+        Location loc = destination.getLocation();
+        teleport(target, loc);
         this.processed = true;
         all.remove(this.receiver);
     }
