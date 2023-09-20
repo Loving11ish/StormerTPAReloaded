@@ -163,10 +163,11 @@ public final class StormerTPAReloaded extends JavaPlugin implements Listener {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(!(sender instanceof Player p)) {
+        if(!(sender instanceof Player)) {
             Message.error(sender, Lang.ERROR_PLAYERONLY.toString());
             return false;
         }
+        Player p = (Player) sender;
         if(command.getName().equalsIgnoreCase("tpa") || command.getName().equalsIgnoreCase("tpahere")) {
             if(args.length == 0) {
                 Message.error(p, Lang.ERROR_MISSING_PLAYER_ARG.toString());

@@ -9,8 +9,5 @@
         <module name="StormerTPAReloaded" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="StormerTPAReloaded" target="17" />
-    </bytecodeTargetLevel>
   </component>
 </project>

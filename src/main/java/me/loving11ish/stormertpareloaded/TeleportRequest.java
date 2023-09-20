@@ -209,9 +209,11 @@ public class TeleportRequest {
                     effectList.add(potionEffect);
                 }
             }
-            for (PotionEffectType potionEffectType : effectList) {
-                target.addPotionEffect(new PotionEffect(potionEffectType, duration, multiplier, true));
-            }
+            StormerTPAReloaded.i.getFoliaLib().getImpl().runAtEntityLater(target, () -> {
+                for (PotionEffectType potionEffectType : effectList) {
+                    target.addPotionEffect(new PotionEffect(potionEffectType, duration, multiplier, true));
+                }
+            }, 20L, TimeUnit.MILLISECONDS);
         }
     }
 

@@ -37,14 +37,14 @@
       <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
     </remote-repository>
     <remote-repository>
-      <option name="id" value="papermc" />
-      <option name="name" value="papermc" />
-      <option name="url" value="https://repo.papermc.io/repository/maven-public/" />
-    </remote-repository>
-    <remote-repository>
       <option name="id" value="devmart-other" />
       <option name="name" value="devmart-other" />
       <option name="url" value="https://nexuslite.gcnt.net/repos/other/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="papermc" />
+      <option name="name" value="papermc" />
+      <option name="url" value="https://repo.papermc.io/repository/maven-public/" />
     </remote-repository>
   </component>
 </project>
